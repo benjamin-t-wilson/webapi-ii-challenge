@@ -98,9 +98,45 @@ router.get("/:id/comments", (req, res) => {
   db.findById(id)
     .then(post => {
       if (post.length > 0) {
-        db.findPostComments(id).then(comments => {
-          res.status(200).json(comments);
-        });
+        db.findPostComments(id)
+          .then(comments => {
+            res.status(200).json(comments);
+          })
+          .catch(err => {
+            res.status(500).json({
+              error: "The post information could not be retrieved.",
+              err
+            });
+          });
+      } else {
+        res
+          .status(404)
+          .json({ message: "The post with the specified ID does not exist." });
+      }
+    })
+    .catch(err => {
+      res
+        .status(500)
+        .json({ error: "The post information could not be retrieved.", err });
+    });
+});
+
+router.delete("/:id", (req, res) => {
+  const id = req.params.id;
+
+  db.findById(id)
+    .then(post => {
+      if (post.length > 0) {
+        db.remove(id)
+          .then(() => {
+            res.status(204).end();
+          })
+          .catch(err => {
+            res.status(500).json({
+              error: "The post information could not be retrieved.",
+              err
+            });
+          });
       } else {
         res
           .status(404)
